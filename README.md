@@ -4,19 +4,13 @@ A Python-based project for moon rover data analysis and visualization.
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd moon_rover
-```
-
-2. Create a virtual environment:
+1. Create a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
 ```
 
-3. Install dependencies:
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
@@ -66,7 +60,3 @@ The generated files will be saved in the current directory:
 - `crater_map_2d.png`: 2D visualization of crater positions
 - `elevation_heatmap.html`: Interactive elevation heatmap
 - `terrain_3d.html`: Interactive 3D terrain visualization
-
-## License
-
-[Add your license information here]
