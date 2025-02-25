@@ -52,7 +52,7 @@ def main():
             elevation_map.generate_elevation_map(craters_file)
             elevation_data = elevation_map.elevation
         terrain_3d = TerrainGenerator3D(elevation_data, size_km)
-        terrain_3d.generate_terrain_views('terrain_3d_path.html', 'terrain_3d.html')
+        terrain_3d.generate_terrain_views('terrain_3d_path.html', 'terrain_3d.html', 'cross_section.html')
 
 if __name__ == "__main__":
     main()

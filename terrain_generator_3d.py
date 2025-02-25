@@ -118,7 +118,7 @@ class TerrainGenerator3D:
         
         # Add surface plot
         fig.add_trace(go.Surface(
-            z=ZI.T,
+            z=-ZI.T,
             x=xi,
             y=yi,
             colorscale=[
@@ -181,8 +181,81 @@ class TerrainGenerator3D:
             fig.write_html(filename)
         return fig
 
-    def generate_terrain_views(self, filename_with_path=None, filename_without_path=None):
+    def generate_cross_section(self, y_km=1.5, filename=None):
+        """Generate a 2D cross-section view of the terrain at specified y coordinate."""
+        # Create interpolation function for the elevation data
+        x = np.linspace(0, self.size_km, self.image_size)
+        y = np.linspace(0, self.size_km, self.image_size)
+        elevation_km = np.nan_to_num(self.elevation / 1000, nan=0.0, posinf=0.0, neginf=0.0)
+        interp_func = RegularGridInterpolator(
+            (x, y), 
+            elevation_km, 
+            bounds_error=False, 
+            fill_value=0.0
+        )
+        
+        # Generate points along the cross-section
+        x_points = np.linspace(0, self.size_km, self.image_size)
+        cross_section_points = np.column_stack((x_points, np.full_like(x_points, y_km)))
+        z_points = interp_func(cross_section_points)  # Convert back to meters
+        
+        # Create the cross-section plot
+        fig = go.Figure()
+        mask_top = z_points > 0
+        mask_bottom = z_points < 0
+        # Add fill above x-axis (red)
+        fig.add_trace(go.Scatter(
+            x=x_points[mask_top],
+            y=-z_points[mask_top],
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(255,0,0,0.3)',
+            name='Above Ground',
+            hoverinfo='skip'
+        ))
+        
+        # Add fill below x-axis (green)
+        fig.add_trace(go.Scatter(
+            x=x_points[mask_bottom],
+            y=-z_points[mask_bottom],
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(0,255,0,0.3)',
+            name='Below Ground'
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=x_points,
+            y=-z_points,
+            mode='lines',
+            line=dict(color='black', width=2),
+            name='Below Ground'
+        ))
+
+        fig.update_layout(
+            title=f'Terrain Cross-section at y = {y_km} km',
+            xaxis_title='Distance (km)',
+            yaxis_title='Elevation (m)',
+            width=1800,
+            height=1000,
+            template='plotly_white',
+            showlegend=True,
+            yaxis=dict(
+                scaleanchor="x",
+                scaleratio=0.001,  # Since x is in km and y in m
+                autorange=True
+            )
+        )
+        
+        if filename:
+            fig.write_html(filename)
+        return fig
+    
+    def generate_terrain_views(self, filename_with_path=None, filename_without_path=None, cross_section_path=None):
         """Generate two views of the terrain: one with path and one without."""
         fig_without_path = self.generate_3d_terrain(filename_without_path, show_path=False)
         fig_with_path = self.generate_3d_terrain(filename_with_path, show_path=True)
-        return fig_with_path, fig_without_path
+        fig_cross_section = self.generate_cross_section(y_km=1.5, filename=cross_section_path)
+        return fig_with_path, fig_without_path, fig_cross_section

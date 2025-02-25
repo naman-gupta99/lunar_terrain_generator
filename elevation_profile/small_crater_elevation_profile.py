@@ -41,10 +41,10 @@ class SmallCraterElevationProfile(ElevationProfile):
         r_norm = r / self.R
         if r_norm <= 1:
             temp = self.C * (np.exp(self.b * r_norm) - np.exp(self.b)) / (1 + np.exp(self.a + self.b * r_norm))
-            return self.D * self.h_t - temp * self.R * 1000
+            return (self.D * self.h_t + temp * self.R) * 1000
         elif r_norm <= 2.5:
             # print(r_norm, self.h_t * ((r_norm ** self.alpha)-1) * 1000)
-            return -self.D * self.h_t * ((r_norm ** self.alpha)) * 1000
+            return self.D * self.h_t * ((r_norm ** self.alpha)) * 1000
             # return 0
         else:
             return 0
