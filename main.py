@@ -3,6 +3,7 @@ from crater_generator import CraterGenerator
 from map_generator_2d import MapGenerator2D
 from elevation_map_generator import ElevationMapGenerator
 from terrain_generator_3d import TerrainGenerator3D
+from cut_fill_generator import CutFillGenerator
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Moon terrain generator')
@@ -10,6 +11,7 @@ def parse_args():
     parser.add_argument('-m', '--map', action='store_true', help='Generate 2D map')
     parser.add_argument('-e', '--elevation', action='store_true', help='Generate elevation map')
     parser.add_argument('-t', '--terrain', action='store_true', help='Generate 3D terrain')
+    parser.add_argument('-cf', '--cut_fill', action='store_true', help='Generate cut and fill map')
     return parser.parse_args()
 
 def main():
@@ -52,7 +54,16 @@ def main():
             elevation_map.generate_elevation_map(craters_file)
             elevation_data = elevation_map.elevation
         terrain_3d = TerrainGenerator3D(elevation_data, size_km)
-        terrain_3d.generate_terrain_views('terrain_3d_path.html', 'terrain_3d.html', 'cross_section.html')
+        terrain_3d.generate_terrain_views('terrain_3d_path.html', 'terrain_3d.html', 'terrain_3d_inverse_path.html')
+
+    # # Cut and fill map
+    # if args.terrain or generate_all:
+    #     if elevation_data is None:
+    #         elevation_map = ElevationMapGenerator(size_km, pixels_per_km)
+    #         elevation_map.generate_elevation_map(craters_file)
+    #         elevation_data = elevation_map.elevation
+    #     terrain_3d = CutFillGenerator(elevation_data, size_km)
+    #     terrain_3d.generate_cut_fill('cut_fill.html')
 
 if __name__ == "__main__":
     main()
