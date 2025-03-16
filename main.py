@@ -57,13 +57,13 @@ def main():
         terrain_3d.generate_terrain_views('terrain_3d_path.html', 'terrain_3d.html', 'terrain_3d_inverse_path.html')
 
     # # Cut and fill map
-    # if args.terrain or generate_all:
-    #     if elevation_data is None:
-    #         elevation_map = ElevationMapGenerator(size_km, pixels_per_km)
-    #         elevation_map.generate_elevation_map(craters_file)
-    #         elevation_data = elevation_map.elevation
-    #     terrain_3d = CutFillGenerator(elevation_data, size_km)
-    #     terrain_3d.generate_cut_fill('cut_fill.html')
+    if args.terrain or generate_all:
+        if elevation_data is None:
+            elevation_map = ElevationMapGenerator(size_km, pixels_per_km)
+            elevation_map.generate_elevation_map(craters_file)
+            elevation_data = elevation_map.elevation
+        terrain_3d = CutFillGenerator(elevation_data, size_km)
+        terrain_3d.generate_cut_fill('cut_fill.html')
 
 if __name__ == "__main__":
     main()
