@@ -29,7 +29,8 @@ def main():
         
         # Plot this angle's line
         plt.semilogx(diameters, max_traversable_radii, '-', 
-                    linewidth=2, color=colors[i], 
+                    linewidth=2.5, 
+                    color=plt.cm.tab10(i % 10),  # Using tab10 colormap for better contrast
                     label=f'{angle}°')
     
     # Add labels and title
@@ -37,15 +38,19 @@ def main():
     plt.ylabel('Minimum Traversable Normalized Radius', fontsize=12)
     plt.title('Crater Traversability at Different Angles', fontsize=14)
     
-    # Add legend
-    plt.legend(title='Traversable Angle', loc='best')
+    # Add legend with better positioning and formatting
+    plt.legend(title='Traversable Angle', loc='upper left', framealpha=0.9, 
+               fontsize=10, title_fontsize=11)
     
     # Add grid and improve appearance
-    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     
+    # Set white background explicitly
+    plt.gca().set_facecolor('white')
+    
     # Show the plot
-    plt.savefig('crater_traversability_multiple_angles.png')
+    plt.savefig('crater_traversability_multiple_angles.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     # Print example values for reference (just for the first angle)
