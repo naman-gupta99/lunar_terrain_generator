@@ -61,16 +61,16 @@ class SmallCraterElevationProfile(ElevationProfile):
     
     def get_min_traversable_normalized_radius(self, traversable_slope_degrees: int) -> float:
         """Get the maximum traversable radius.
-        
+        0
         Returns:
-            The r_norm at which the slope is cos(80°) and r_norm > 1
+            The r_norm at which the slope is cos(170°) and r_norm > 1
         """
-        cos_slope = np.cos(np.radians(traversable_slope_degrees))
+        slope = np.tan(np.radians(traversable_slope_degrees))
         l, r = 1, 100
         while r - l > 0.01:
             mid = (l + r) / 2
             s = self.slope(mid)
-            if s < cos_slope:
+            if s < slope:
                 l = mid
             else:
                 r = mid

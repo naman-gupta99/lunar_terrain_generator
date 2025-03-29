@@ -7,7 +7,7 @@ def main():
     # Starting from a small positive value instead of 0 to avoid potential issues
     diameters = np.logspace(0, 4, 40)  # Exponential range from 1 to 10000
     
-    angles = np.arange(100, 185, 10)
+    angles = np.arange(100, 180, 10)
     
     # Create the plot
     plt.figure(figsize=(12, 8))
