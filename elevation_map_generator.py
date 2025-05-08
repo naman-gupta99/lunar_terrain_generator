@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from elevation_profile import ProfileFactory
+from noise import pnoise2
 
 class ElevationMapGenerator:
     def __init__(self, size_km, pixels_per_km):
@@ -16,7 +17,7 @@ class ElevationMapGenerator:
 
     def generate_elevation_map(self, crater_csv):
         df = pd.read_csv(crater_csv)
-        
+
         for _, crater in df.iterrows():
             center_x = int(crater['x_km'] * self.pixels_per_km)
             center_y = int(crater['y_km'] * self.pixels_per_km)
@@ -25,43 +26,56 @@ class ElevationMapGenerator:
             # Skip if radius is zero
             if crater_radius_px <= 0:
                 continue
-            
+
             radius_px = int(crater_radius_px * 2.5)
-            
+
             # Create crater profile
             profile = ProfileFactory.create('small', {'D': crater['radius_m'] * 2, 'depth': crater['depth_m']})  # D is diameter in meters
 
             # Generate elevation grid
             y_coords, x_coords = np.ogrid[-radius_px:radius_px+1, -radius_px:radius_px+1]
             dist_from_center = np.sqrt(x_coords**2 + y_coords**2)
-            
+
             # Convert pixel distances to meters
             dist_meters = dist_from_center * (1000 / self.pixels_per_km)  # Convert to meters
-            
+
             # Calculate crater depth using profile
             crater_depth = np.zeros_like(dist_from_center)
             valid_points = dist_meters <= (2.5 * crater['radius_m'])  # Profile valid up to 2.5R
             crater_depth[valid_points] = np.vectorize(profile.get_height)(dist_meters[valid_points])
-            
+
             # Apply crater to elevation map
             y_min = max(0, center_y-radius_px)
             y_max = min(self.image_size, center_y+radius_px+1)
             x_min = max(0, center_x-radius_px)
             x_max = min(self.image_size, center_x+radius_px+1)
-            
+
             mask_y_min = max(0, -(center_y-radius_px))
             mask_y_max = crater_depth.shape[0] - max(0, (center_y+radius_px+1) - self.image_size)
             mask_x_min = max(0, -(center_x-radius_px))
             mask_x_max = crater_depth.shape[1] - max(0, (center_x+radius_px+1) - self.image_size)
-            
+
             self.elevation[y_min:y_max, x_min:x_max] -= crater_depth[mask_y_min:mask_y_max, mask_x_min:mask_x_max]
+
+    def add_undulation(self, scale=0.00002, amplitude=400, octaves=4, seed=0):
+        np.random.seed(seed)
+        elevation_noise = np.zeros_like(self.elevation, dtype=np.float32)
+        for y in range(self.image_size):
+            for x in range(self.image_size):
+                nx = x * scale
+                ny = y * scale
+                noise_val = pnoise2(nx, ny, octaves=octaves, repeatx=1024, repeaty=1024, base=seed)
+                elevation_noise[y, x] = noise_val
+
+        # Use raw noise values in range [-1, 1] and scale
+        self.elevation += elevation_noise * amplitude
 
     def plot_heatmap(self, filename=None):
         x = np.linspace(0, self.size_km, self.image_size)
         y = np.linspace(0, self.size_km, self.image_size)
 
         fig = go.Figure()
-        
+
         # Add heatmap layer
         fig.add_trace(go.Heatmap(
             z=self.elevation,
@@ -75,7 +89,7 @@ class ElevationMapGenerator:
             ],
             hovertemplate='X: %{x:.1f} km<br>Y: %{y:.1f} km<br>Elevation: %{z:.1f} m<extra></extra>'
         ))
-        
+
         # Add contour layer at zero elevation
         fig.add_trace(go.Contour(
             z=self.elevation,
@@ -118,7 +132,7 @@ class ElevationMapGenerator:
             plot_bgcolor='white',
             paper_bgcolor='white'
         )
-        
+
         if filename:
             fig.write_html(filename)
         return fig
