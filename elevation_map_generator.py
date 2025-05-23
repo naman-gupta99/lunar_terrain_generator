@@ -60,7 +60,7 @@ class ElevationMapGenerator:
         # Print the max and min value in the elevation matrix
         print(f"Elevation Map Range: {self.elevation.min():.2f}m to {self.elevation.max():.2f}m | Δ={self.elevation.max() - self.elevation.min():.2f}m")
 
-    def add_undulation(self, scale=0.00002, amplitude=40000, octaves=4, seed=0):
+    def add_undulation(self, scale=0.00002, amplitude=2000000, octaves=4, seed=0):
         np.random.seed(seed)
         elevation_noise = np.zeros_like(self.elevation, dtype=np.float32)
         for y in range(self.image_size):

@@ -35,6 +35,6 @@ for i in range(5, 6):
     elevation_range = save_heightmap(elevation_df, f"heightmap_{i}.png")
 
     print(
-        f"Use Z-scale = {(elevation_range * 1000) / 65536:.3f} in Unreal for heightmap_{i}",
-        f"X-Y scale = {size_km/pixels_per_km * 10_000_000:.3f} in Unreal",
+        f"Use Z-scale = {(elevation_range * 10) / 65536:.3f} in Unreal for heightmap_{i}",
+        f"X-Y scale = {(size_km/pixels_per_km )* 100_000:.3f} in Unreal",
     )
