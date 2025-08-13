@@ -25,16 +25,26 @@ def save_heightmap(df, filename="heightmap.png"):
 
 size_km = 1
 pixels_per_km = 8129
-for i in range(5, 6):
+for i in range(6, 7):
     generator = ElevationMapGenerator(size_km, pixels_per_km)
     generator.generate_elevation_map(f"craters_{i}.csv")
+
+    elevation_df = pd.DataFrame(generator.elevation)
+    elevation_range = save_heightmap(elevation_df, f"heightmap_{i}_no_undulation.png")
+
+    generator.generate_principal_slope_map()
+    generator.save_principal_slope_map(f"principal_slope_map_{i}_no_undulation.png")
+
     generator.add_undulation()
     # generator.plot_heatmap(f"heatmap_{i}.html")
+
+    generator.generate_principal_slope_map()
+    generator.save_principal_slope_map(f"principal_slope_map_{i}.png")
 
     elevation_df = pd.DataFrame(generator.elevation)
     elevation_range = save_heightmap(elevation_df, f"heightmap_{i}.png")
 
     print(
-        f"Use Z-scale = {(elevation_range * 10) / 65536:.3f} in Unreal for heightmap_{i}",
+        f"Use Z-scale = {(elevation_range) / 65536:.3f} in Unreal for heightmap_{i}",
         f"X-Y scale = {(size_km/pixels_per_km )* 100_000:.3f} in Unreal",
     )
