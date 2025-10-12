@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from PIL import Image
 from elevation_profile import ProfileFactory
 from noise import pnoise2
 
@@ -76,6 +77,26 @@ class ElevationMapGenerator:
         print(
             f"Undulation Elevation Map Range: {self.elevation.min():.2f}m to {self.elevation.max():.2f}m | Δ={self.elevation.max() - self.elevation.min():.2f}m"
         )
+    
+    def generate_principal_slope_map(self):
+        # Calculate the gradient of the elevation map
+        gradient_y, gradient_x = np.gradient(self.elevation)
+
+        # Calculate the principal slope
+        principal_slope = np.sqrt(gradient_x**2 + gradient_y**2)
+
+        # Normalize the principal slope to 0-65535
+        min_val = principal_slope.min()
+        max_val = principal_slope.max()
+        print(f"Principal Slope Range: {min_val:.2f} to {max_val:.2f} | Δ={max_val - min_val:.2f}")
+        norm_slope = ((principal_slope - min_val) / (max_val - min_val) * 65535).astype(np.uint16)
+
+        self.principal_slope = norm_slope
+        
+    def save_principal_slope_map(self, filename="principal_slope_map.png"):
+        img = Image.fromarray(self.principal_slope, mode='I;16')
+        img.save(filename)
+        print(f"Principal slope map saved as {filename}")
 
     def plot_heatmap(self, filename=None):
         x = np.linspace(0, self.size_km, self.image_size)
