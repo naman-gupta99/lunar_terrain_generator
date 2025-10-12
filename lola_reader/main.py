@@ -6,21 +6,24 @@ from read_img import read_square_by_center
 LOW_RES_CORRECT_ALIGN_DEM = {
     "path": "ldem_85s_10m_float.tif",
     "center": (289.9258, -86.8542),
-    "true_crs_src": "ldem_85s_10m_float.tif",
-    "suffix": ""
+    "suffix": "",
+    "swap_xy": False,
 }
 HIGH_RES_CORRECT_ALIGN_DEM = {
     "path": "Lunar_LROnac_Haworth_sfs-dem_1m_v3.tif",
     "center": (340.0742, -86.8542),
-    "true_crs_src": "ldem_85s_10m_float.tif",
-    "suffix": "_1m"
+    "suffix": "_1m",
+    "swap_xy": True,
 }
-
-plot = HIGH_RES_CORRECT_ALIGN_DEM
 
 
 def plot_zoom_sequence(
-    src_path, true_crs_src, center, center_is_lonlat=True, lon_domain="auto", suffix=""
+    src_path,
+    center,
+    center_is_lonlat=True,
+    lon_domain="auto",
+    suffix="",
+    swap_xy=False,
 ):
     """
     Generate a sequence of zoomed images centered on the same point.
@@ -44,10 +47,10 @@ def plot_zoom_sequence(
         try:
             chip, chip_tr, chip_crs, win = read_square_by_center(
                 src_path,
-                true_crs_src=true_crs_src,
                 center=center,
                 width_m=width,
                 lon_domain=lon_domain,
+                swap_xy=swap_xy,
             )
 
             # Apply downsampling if needed
@@ -89,6 +92,8 @@ def plot_zoom_sequence(
             local_min = np.nanmin(chip)
             local_max = np.nanmax(chip)
             print(f"      Local elevation range: {local_min:.1f} to {local_max:.1f} m")
+
+            
 
             # Use terrain colormap with local elevation range for better contrast
             im = plt.imshow(
@@ -198,11 +203,15 @@ def plot_zoom_sequence(
     print(f"   Grayscale files generated: {', '.join(grayscale_files)}")
 
 
+plot = HIGH_RES_CORRECT_ALIGN_DEM
+
+print("Processing high-res DEM...")
+
 plot_zoom_sequence(
     plot["path"],
-    true_crs_src=plot["true_crs_src"],
     center=plot["center"],
     center_is_lonlat=True,
     lon_domain="auto",
-    suffix="_1m",
+    suffix=plot["suffix"],
+    swap_xy=plot.get("swap_xy", False),
 )
